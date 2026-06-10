@@ -1,0 +1,9 @@
+https://github.com/ozanbozkurtt/ansible-yugabyte.git
+https://github.com/eddster2309/ansible-role-garage
+geerlingguy.nfs
+lablabs.rke2
+ricsanfre.minio
+roles/robertdebock.haproxy
+mmas.hashi_vault
+lucasheld.uptime_kuma
+oxlorg.opnsense
