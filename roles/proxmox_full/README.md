@@ -15,7 +15,7 @@ Role Variables
 The following variables are genearl and should be set at the role or group level:
 
 | Variablename | Required | Default | Description |
----------------------------------------------------
+|--------------|----------|---------|-------------|
 |terraform_project_path | yes | "" | Path to the folder where terraform files will be created |
 |terraform_binary_path | no | "/usr/bin/terraform" | Path to the terraform/opentofu executable |
 |terraform_pmx_endpoint | yes | "http://localhost:8006/" | Where proxmox can be reached |
@@ -27,7 +27,7 @@ The following variables are genearl and should be set at the role or group level
 Each VM has specific settings which are set by the following variables. This should be set in either group_vars or host_vars
 
 | Variablename | Required | Default | Description |
----------------------------------------------------
+|--------------|----------|---------|-------------|
 |pmx_name | no | "{{ inventory_hostname }}" | The name of the VM |
 | existing_node_id | no |   | VM ID, can be used to import the vm into state
 |pmx_node| yes | "pmx01" | Name of the Porxmox Node |
