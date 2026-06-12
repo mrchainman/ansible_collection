@@ -1,0 +1,71 @@
+# vim: set filetype=ansible
+## vim: set filetype=yaml.ansible :
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for terraform
+terraform_project_path: ""
+terraform_binary_path: "/usr/bin/terraform"
+terraform_pmx_endpoint: "http://localhost:8006/"
+terraform_pmx_api_token: "<user>@<pam/pve>!<tokenname>=<tokensecret>"
+terraform_parallelism: 50
+
+terraform_templates:
+  - template: sshkey.pub.j2
+    destination: "{{ terraform_project_path }}/sshkey.pub"
+  - template: variables.tf.j2
+    destination: "{{ terraform_project_path }}/variables.tf"
+  - template: terraform.tfvars.j2
+    destination: "{{ terraform_project_path }}/terraform.tfvars"
+  - template: main.tf.j2
+    destination: "{{ terraform_project_path }}/main.tf"
+  - template: images.tf.j2
+    destination: "{{ terraform_project_path }}/images.tf"
+  - template: data.tf.j2
+    destination: "{{ terraform_project_path }}/data.tf"
+
+terraform_multi_templates:
+  - template: vm.tf.j2
+    destination: "{{ terraform_project_path }}/{{ inventory_hostname }}.tf"
+
+terraform_images:
+  - name: debian_cloud_image
+    imagestore: local
+    filename: debian-13-generic-amd64.qcow2
+    url: "https://cloud.debian.org/images/cloud/trixie/latest/debian-13-generic-amd64.qcow2"
+#
+pmx_name: "{{ inventory_hostname }}"
+pmx_node: "pmx01"
+pmx_import_image: "debian_cloud_image"
+pmx_memory: 1024
+pmx_balloon: true
+pmx_bios_type: "seabios"
+pmx_machine: "q35"
+pmx_description: ""
+pmx_cpu_arch: "x86_64"
+pmx_cpu_type: "x86-64-v2-AES"
+pmx_cpuunits: 1
+pmx_cores: "2"
+pmx_vcpus: "2"
+pmx_nw_bridge: "vmbr2"
+pmx_ip_address: "{{ ansible_host }}"
+nw_mask: 24
+pmx_ip_address_net: "{{ ansible_host }}/{{ nw_mask }}"
+pmx_gw_address: "192.168.11.1"
+pmx_dns: "{{ pmx_gw_address }}"
+pmx_root_storage: "local-zfs"
+pmx_root_size: 30
+pmx_data_storage: "encset"
+pmx_ostype: "l26"
+pmx_boot:
+  - scsi0
+  - ide2
+pmx_scsihw: virtio-scsi-single
+pmx_extra_disks:
+  - mountpoint: /mnt
+    size: 50
+    storage: "{{ pmx_data_storage }}"
+    backup: false
+    replicate: true
+    ssd: false
+pmx_vga: std
+pmx_ssh_key: "changeme"

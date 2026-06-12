@@ -1,0 +1,13 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+    }
+  }
+}
+
+provider "proxmox" {
+  endpoint = "{{ terraform_pmx_endpoint }}"
+  api_token = "{{ terraform_pmx_api_token }}"
+  insecure = true
+}

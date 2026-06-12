@@ -1,0 +1,48 @@
+# vim: set filetype=ansible
+## vim: set filetype=yaml.ansible :
+---
+- name: Decrypt sensible data
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.command: >
+    ansible-vault decrypt "{{ terraform_project_path }}/terraform.tfvars"
+  no_log: true
+
+
+- name: 'Plan Terraform code'
+  delegate_to: localhost
+  run_once: true
+  community.general.terraform:
+    project_path: "{{ terraform_project_path }}"
+    no_color: true
+    binary_path: "{{ terraform_binary_path }}"
+    plan_file: "tf.plan"
+    state: planned
+
+- name: Check before deploying
+  ansible.builtin.pause:
+    prompt: "Please check the generated code and plan (tmp_plan.tf) before we deploy."
+
+- name: 'Deploy Terraform code'
+  delegate_to: localhost
+  run_once: true
+  community.general.terraform:
+    project_path: "{{ terraform_project_path }}"
+    no_color: true
+    binary_path: "{{ terraform_binary_path }}"
+    plan_file: "tf.plan"
+    state: present
+    parallelism: "{{ terraform_parallelism }}"
+    # targets:
+    #   - "module.mytarget"
+    # variables_files:
+    #   - "./secrets.tfvars"
+    #
+    #
+- name: Encrypt sensible data
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.command: >
+    ansible-vault encrypt "{{ terraform_project_path }}/terraform.tfvars"
+  no_log: true
+

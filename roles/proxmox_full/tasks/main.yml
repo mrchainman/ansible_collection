@@ -1,0 +1,21 @@
+# vim: set filetype=ansible
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for terraform
+- name: Checks
+  ansible.builtin.include_tasks:
+    file: ./00_checks.yml
+
+- name: Generate files
+  ansible.builtin.include_tasks:
+    file: ./01_generate.yml
+
+- name: Import
+  ansible.builtin.include_tasks:
+    file: ./03_import.yml
+  when: existing_node_id is defined
+
+- name: Apply configs
+  ansible.builtin.include_tasks:
+    file: ./02_apply.yml
+

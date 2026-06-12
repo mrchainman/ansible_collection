@@ -1,0 +1,10 @@
+{% for image in terraform_images %}
+resource "proxmox_virtual_environment_download_file" "{{ image.name }}" {
+  content_type = "import"
+  datastore_id = "{{ image.imagestore }}"
+  node_name    = "{{ pmx_node }}"
+  url          = "{{ image.url }}"
+  file_name = "{{ image.filename }}"
+  overwrite_unmanaged = true
+}
+{% endfor %}

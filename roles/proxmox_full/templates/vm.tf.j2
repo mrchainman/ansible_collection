@@ -1,0 +1,86 @@
+resource "proxmox_virtual_environment_vm" "{{ inventory_hostname | replace('.','_') }}" {
+  name      = "{{ inventory_hostname }}"
+  node_name = "{{ pmx_node }}"
+  agent {
+    enabled = true
+  }
+
+  bios = "{{ pmx_bios_type }}"
+  boot_order = {{ pmx_boot | string | replace('\'','"') }}
+
+  cpu {
+    architecture = "{{ pmx_cpu_arch }}"
+    cores = "{{ pmx_cores }}"
+    type = "{{ pmx_cpu_type }}"
+  }
+
+  description = "{{ pmx_description }}"
+  machine = "{{ pmx_machine }}"
+  memory { 
+    dedicated = "{{ pmx_memory }}" 
+    floating = "{{ pmx_memory }}" 
+  }
+
+  operating_system {
+    type = "{{ pmx_ostype }}"
+  }
+
+  scsi_hardware = "{{ pmx_scsihw }}"
+
+  vga {
+    type = "{{ pmx_vga }}"
+  }
+
+  serial_device {
+    device = "socket" 
+  }
+
+  # should be true if qemu agent is not installed / enabled on the VM
+  stop_on_destroy = true
+
+  initialization {
+    datastore_id = "local"
+    user_account {
+      # do not use this in production, configure your own ssh key instead!
+      username = "ansible"
+      keys = [trimspace(data.local_file.ssh_public_key.content)]
+    }
+    ip_config {
+      ipv4 {
+        address = "{{ pmx_ip_address_net }}"
+        gateway = "{{ pmx_gw_address }}"
+      }
+    }
+    dns {
+      servers = ["{{ pmx_dns }}"]
+    }
+  }
+
+  disk {
+    datastore_id = "{{ pmx_root_storage }}"
+    import_from  = proxmox_virtual_environment_download_file.{{ pmx_import_image }}.id
+    interface    = "virtio0"
+    iothread     = true
+    discard      = "on"
+    size         = "{{ pmx_root_size }}"
+    backup = true
+    replicate = true
+  }
+
+{% for disk in pmx_extra_disks %}
+  disk {
+    datastore_id = "{{ disk.storage }}"
+    interface    = "virtio0"
+    iothread     = true
+    discard      = "on"
+    size         = "{{ disk.size }}"
+    backup = {{ disk.backup | string | lower }}
+    replicate = {{ disk.replicate | string | lower }}
+    ssd = {{ disk.ssd | string | lower }}
+  }
+{% endfor %}
+
+  network_device {
+    bridge = "{{ pmx_nw_bridge }}"
+  }
+}

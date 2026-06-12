@@ -1,0 +1,36 @@
+# vim: set filetype=ansible
+---
+- name: Decrypt sensible data
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.command: >
+    ansible-vault decrypt "{{ terraform_project_path }}/terraform.tfvars"
+  no_log: true
+
+- name: Set module as fact
+  ansible.builtin.set_fact:
+    tf_module: "proxmox_virtual_environment_vm.{{ inventory_hostname | replace('.','_') }}"
+
+
+- name: Import existing VMs
+  delegate_to: localhost
+  ansible.builtin.command:
+    chdir: "{{ terraform_project_path }}"
+    cmd:  "{{ terraform_binary_path }} state list"
+  register: existing_vms_in_state
+
+- name: Import existing VMs
+  delegate_to: localhost
+  ansible.builtin.command:
+    chdir: "{{ terraform_project_path }}"
+    cmd:  "{{ terraform_binary_path }} import {{ tf_module }} {{ inventory_hostname }}/{{ existing_node_id }}"
+  when: tf_module not in existing_vms_in_state.stdout_lines
+
+
+- name: Encrypt sensible data
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.command: >
+    ansible-vault encrypt "{{ terraform_project_path }}/terraform.tfvars"
+  no_log: true
+

@@ -1,0 +1,5 @@
+# vim: set filetype=ansible
+---
+- name: Assert encrypted token is present
+  ansible.builtin.assert:
+    that: terraform_pmx_api_token is defined
